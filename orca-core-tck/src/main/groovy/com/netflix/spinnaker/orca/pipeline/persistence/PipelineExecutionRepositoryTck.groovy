@@ -24,8 +24,6 @@ import com.netflix.spinnaker.orca.pipeline.model.JenkinsTrigger
 import com.netflix.spinnaker.orca.pipeline.model.PipelineTrigger
 import com.netflix.spinnaker.orca.pipeline.model.support.TriggerDeserializer
 import com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository.ExecutionCriteria
-import com.netflix.spinnaker.orca.sql.PipelineRefTriggerDeserializerSupplier
-import com.netflix.spinnaker.orca.sql.pipeline.persistence.PipelineRefTrigger
 import rx.schedulers.Schedulers
 import spock.lang.Specification
 import spock.lang.Subject

@@ -28,7 +28,7 @@ import com.netflix.spinnaker.orca.clouddriver.service.JobService
 import com.netflix.spinnaker.orca.exceptions.PipelineTemplateValidationException
 import com.netflix.spinnaker.orca.front50.Front50Service
 
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletResponse
 import com.netflix.spinnaker.kork.common.Header
 import com.netflix.spinnaker.orca.igor.BuildService
 import com.netflix.spinnaker.orca.jackson.OrcaObjectMapper
