@@ -27,8 +27,8 @@ import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.*;
 import static net.logstash.logback.argument.StructuredArguments.value;
-import static redis.clients.jedis.ListPosition.AFTER;
-import static redis.clients.jedis.ListPosition.BEFORE;
+import static redis.clients.jedis.args.ListPosition.AFTER;
+import static redis.clients.jedis.args.ListPosition.BEFORE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -58,10 +58,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.ListPosition;
 import redis.clients.jedis.Response;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.args.ListPosition;
+import redis.clients.jedis.params.ScanParams;
+import redis.clients.jedis.resps.ScanResult;
 import rx.Observable;
 import rx.Scheduler;
 import rx.functions.Func0;
@@ -1191,7 +1191,7 @@ public class RedisExecutionRepository implements ExecutionRepository {
       Long buildTimeStartBoundary,
       Long buildTimeEndBoundary) {
     String executionsKey = executionsByPipelineKey(pipelineConfigId);
-    Set<String> executionIds =
+    List<String> executionIds =
         delegate.withCommandsClient(
             c -> {
               return c.zrangeByScore(executionsKey, buildTimeStartBoundary, buildTimeEndBoundary);
