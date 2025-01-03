@@ -16,7 +16,6 @@
 package com.netflix.spinnaker.orca.pipeline.persistence.jedis
 
 import com.netflix.spectator.api.NoopRegistry
-import com.netflix.spectator.api.Registry
 import com.netflix.spinnaker.kork.jedis.EmbeddedRedis
 import com.netflix.spinnaker.kork.jedis.JedisClientDelegate
 import com.netflix.spinnaker.kork.jedis.RedisClientSelector
@@ -35,14 +34,14 @@ import spock.lang.Unroll
 
 import java.util.concurrent.CountDownLatch
 
+import static com.netflix.spinnaker.orca.api.pipeline.SyntheticStageOwner.STAGE_AFTER
+import static com.netflix.spinnaker.orca.api.pipeline.SyntheticStageOwner.STAGE_BEFORE
 import static com.netflix.spinnaker.orca.api.pipeline.models.ExecutionStatus.RUNNING
 import static com.netflix.spinnaker.orca.api.pipeline.models.ExecutionStatus.SUCCEEDED
 import static com.netflix.spinnaker.orca.api.pipeline.models.ExecutionType.ORCHESTRATION
 import static com.netflix.spinnaker.orca.api.pipeline.models.ExecutionType.PIPELINE
-import static com.netflix.spinnaker.orca.api.pipeline.SyntheticStageOwner.STAGE_AFTER
-import static com.netflix.spinnaker.orca.api.pipeline.SyntheticStageOwner.STAGE_BEFORE
-import static com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository.*
-import static com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository.ExecutionComparator.*
+import static com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository.ExecutionComparator.BUILD_TIME_ASC
+import static com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository.ExecutionCriteria
 import static com.netflix.spinnaker.orca.test.model.ExecutionBuilder.*
 import static java.util.concurrent.TimeUnit.SECONDS
 
@@ -130,7 +129,7 @@ class JedisPipelineExecutionRepositorySpec extends PipelineExecutionRepositoryTc
     id = "some-pipeline-id"
   }
 
-  def "storing/deleting a pipeline updates the executionsByPipeline set"() {
+  def "storing/deleting a pipeline updates the executionsByPipeline list"() {
     given:
     def pipeline = pipeline {
       stage {
@@ -145,7 +144,7 @@ class JedisPipelineExecutionRepositorySpec extends PipelineExecutionRepositoryTc
     then:
     jedis.zrange(RedisExecutionRepository.executionsByPipelineKey(pipeline.pipelineConfigId), 0, 1) == [
       pipeline.id
-    ] as Set<String>
+    ]
 
     when:
     repository.delete(pipeline.type, pipeline.id)
