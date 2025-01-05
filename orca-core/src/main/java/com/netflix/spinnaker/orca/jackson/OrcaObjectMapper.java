@@ -21,8 +21,10 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.READ_DATE_TI
 import static com.fasterxml.jackson.databind.DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
@@ -39,6 +41,8 @@ import com.netflix.spinnaker.orca.jackson.mixin.TriggerMixin;
 import com.netflix.spinnaker.orca.pipeline.model.PipelineExecutionImpl;
 import com.netflix.spinnaker.orca.pipeline.model.StageExecutionImpl;
 import com.netflix.spinnaker.orca.pipeline.model.TaskExecutionImpl;
+import java.io.IOException;
+import org.springframework.http.HttpMethod;
 
 public class OrcaObjectMapper {
   private OrcaObjectMapper() {}
@@ -71,6 +75,11 @@ public class OrcaObjectMapper {
 
     instance.registerModule(module);
 
+    SimpleModule httpMethodModule = new SimpleModule();
+    httpMethodModule.addSerializer(HttpMethod.class, new HttpMethodSerializer());
+    httpMethodModule.addDeserializer(HttpMethod.class, new HttpMethodDeserializer());
+    instance.registerModule(httpMethodModule);
+
     return instance;
   }
   /**
@@ -82,5 +91,20 @@ public class OrcaObjectMapper {
    */
   public static ObjectMapper getInstance() {
     return INSTANCE;
+  }
+
+  static class HttpMethodSerializer extends JsonSerializer<HttpMethod> {
+    @Override
+    public void serialize(HttpMethod value, JsonGenerator gen, SerializerProvider serializers)
+        throws IOException {
+      gen.writeString(value.name().toUpperCase());
+    }
+  }
+
+  static class HttpMethodDeserializer extends JsonDeserializer<HttpMethod> {
+    @Override
+    public HttpMethod deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+      return HttpMethod.valueOf(p.getText().toUpperCase());
+    }
   }
 }
