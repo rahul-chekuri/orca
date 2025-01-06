@@ -55,6 +55,7 @@ import com.nhaarman.mockito_kotlin.reset
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
+import io.reactivex.rxjava3.core.Observable
 import java.time.temporal.ChronoUnit.HOURS
 import java.time.temporal.ChronoUnit.MINUTES
 import kotlin.collections.contains
@@ -72,8 +73,6 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.lifecycle.CachingMode.GROUP
 import org.jetbrains.spek.subject.SubjectSpek
-import org.springframework.test.web.client.ExpectedCount.once
-import rx.Observable
 
 object RestartStageHandlerTest : SubjectSpek<RestartStageHandler>({
 
@@ -480,7 +479,7 @@ object RestartStageHandlerTest : SubjectSpek<RestartStageHandler>({
       whenever(repository.retrieve(message.executionType, message.executionId)) doReturn pipeline
       whenever(repository.retrievePipelinesForPipelineConfigId(
         pipeline.pipelineConfigId,
-        ExecutionRepository.ExecutionCriteria().setPageSize(2).setStatuses(RUNNING))) doReturn Observable.from(listOf(runningPipeline))
+        ExecutionRepository.ExecutionCriteria().setPageSize(2).setStatuses(RUNNING))) doReturn Observable.fromIterable(listOf(runningPipeline))
     }
 
     afterGroup(::resetMocks)
@@ -527,7 +526,7 @@ object RestartStageHandlerTest : SubjectSpek<RestartStageHandler>({
       whenever(repository.retrieve(message.executionType, message.executionId)) doReturn pipeline
       whenever(repository.retrievePipelinesForPipelineConfigId(
         pipeline.pipelineConfigId,
-        ExecutionRepository.ExecutionCriteria().setPageSize(2).setStatuses(RUNNING))) doReturn Observable.from(listOf(runningPipeline))
+        ExecutionRepository.ExecutionCriteria().setPageSize(2).setStatuses(RUNNING))) doReturn Observable.fromIterable(listOf(runningPipeline))
     }
 
     afterGroup(::resetMocks)

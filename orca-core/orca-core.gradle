@@ -29,7 +29,7 @@ dependencies {
   api("io.spinnaker.kork:kork-plugins")
   api("io.spinnaker.kork:kork-security")
   api("io.spinnaker.kork:kork-telemetry")
-  api("io.reactivex:rxjava")
+  api("io.reactivex.rxjava3:rxjava")
 
   api(project(":orca-api"))
   implementation("com.github.ben-manes.caffeine:guava")

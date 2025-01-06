@@ -42,10 +42,10 @@ import com.netflix.spinnaker.orca.pipelinetemplate.v1schema.handler.v2.V2SchemaH
 import com.netflix.spinnaker.orca.pipelinetemplate.v1schema.model.PipelineTemplate
 import com.netflix.spinnaker.orca.pipelinetemplate.v1schema.model.TemplateConfiguration
 import com.netflix.spinnaker.orca.pipelinetemplate.v1schema.render.JinjaRenderer
+import io.reactivex.rxjava3.core.Observable
 import org.slf4j.MDC
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.StaticApplicationContext
-import rx.Observable
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -858,7 +858,7 @@ class DependentPipelineStarterSpec extends Specification {
     }
     1 * templateLoader.load(_ as TemplateConfiguration.TemplateSource, _, _) >> [triggeredPipelineTemplate]
     1 * executionRepository.retrievePipelinesForPipelineConfigId("triggered", _ as ExecutionRepository.ExecutionCriteria) >>
-      Observable.just(priorExecution)
+        Observable.just(priorExecution)
 
     when:
     def result = dependentPipelineStarter.trigger(

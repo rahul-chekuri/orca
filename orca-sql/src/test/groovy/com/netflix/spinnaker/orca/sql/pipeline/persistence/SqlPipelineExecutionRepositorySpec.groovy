@@ -35,8 +35,8 @@ import com.netflix.spinnaker.orca.pipeline.model.PipelineExecutionImpl
 import com.netflix.spinnaker.orca.pipeline.model.StageExecutionImpl
 import com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository
 import com.netflix.spinnaker.orca.pipeline.persistence.PipelineExecutionRepositoryTck
+import io.reactivex.rxjava3.schedulers.Schedulers
 import org.jooq.impl.DSL
-import rx.schedulers.Schedulers
 import de.huxhorn.sulky.ulid.ULID
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -112,7 +112,7 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     repo.store(e)
 
     then:
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
     pipelines.size() == 1
     pipelines[0].id == e.id
     pipelines[0].stages.size() == 1
@@ -254,7 +254,7 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     repo.store(e)
 
     then:
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
     pipelines.size() == 1
     pipelines[0].id == id
     pipelines[0].stages.size() == 1
@@ -273,7 +273,7 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     repo.store(e)
 
     then:
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
     pipelines.size() == 1
     pipelines[0].id == id
     pipelines[0].stages.size() == 1
@@ -295,7 +295,7 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     repo.store(e)
 
     then:
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
     pipelines.size() == 1
     pipelines[0].id == id
     pipelines[0].stages.size() == 1
@@ -346,14 +346,14 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     repo.store(orig)
 
     when:
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
 
     then:
     pipelines.size() == 1
 
     when:
     repo.delete(PIPELINE, orig.id)
-    pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
 
     then:
     pipelines.size() == 0
@@ -368,14 +368,14 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     repo.store(orig)
 
     when:
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
 
     then:
     pipelines.size() == 1
 
     when:
     repo.delete(PIPELINE, id)
-    pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
 
     then:
     pipelines.size() == 0
@@ -394,7 +394,7 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     e.stages.add(new StageExecutionImpl(e, "wait", "wait stage 2", [bar: 'BAR']))
     repo.store(e)
 
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
     def storedStages = e.stages
     def loadedStages = pipelines*.stages.flatten()
 
@@ -420,7 +420,7 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     e.stages.add(new StageExecutionImpl(e, "wait", "wait stage 2", [bar: 'BAR']))
     repo.store(e)
 
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
     def storedStages = e.stages as Set
     def loadedStages = pipelines*.stages.flatten() as Set
 
@@ -443,7 +443,7 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     stage.name = "wait stage updated"
 
     repo.storeStage(stage)
-    def pipelines = repo.retrieve(PIPELINE).toList().toBlocking().single()
+    def pipelines = repo.retrieve(PIPELINE).toList().blockingGet()
 
     then:
     pipelines.size() == 1
@@ -469,10 +469,9 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     when:
     def results = repository
       .retrieveOrchestrationsForApplication("spinnaker", criteria)
-      .subscribeOn(Schedulers.immediate())
+      .subscribeOn(Schedulers.trampoline())
       .toList()
-      .toBlocking()
-      .first()
+      .blockingGet()
 
     then:
     with(results) {
@@ -500,10 +499,9 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     when:
     def results = repository
       .retrieveOrchestrationsForApplication("spinnaker", criteria)
-      .subscribeOn(Schedulers.immediate())
+      .subscribeOn(Schedulers.trampoline())
       .toList()
-      .toBlocking()
-      .first()
+      .blockingGet()
 
     then:
     results.isEmpty()
@@ -529,10 +527,9 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     when:
     def results = repository
       .retrieveOrchestrationsForApplication("spinnaker", criteria)
-      .subscribeOn(Schedulers.immediate())
+      .subscribeOn(Schedulers.trampoline())
       .toList()
-      .toBlocking()
-      .first()
+      .blockingGet()
 
     then:
     with(results) {
@@ -562,10 +559,9 @@ abstract class SqlPipelineExecutionRepositorySpec extends PipelineExecutionRepos
     when:
     def results = repository
       .retrieveOrchestrationsForApplication("spinnaker", criteria)
-      .subscribeOn(Schedulers.immediate())
+      .subscribeOn(Schedulers.trampoline())
       .toList()
-      .toBlocking()
-      .first()
+      .blockingGet()
 
     then:
     with(results) {
