@@ -309,7 +309,7 @@ class SqlExecutionRepositoryTest : JUnit5Minutests {
         sqlExecutionRepository.store(pipelineExecution2)
 
         val observable = sqlExecutionRepository.retrievePipelinesForApplication("application-2")
-        val executions = observable.toList().toBlocking().single()
+        val executions = observable.toList().blockingGet()
         assertThat(executions.map(PipelineExecution::getApplication).single()).isEqualTo("application-2")
       }
     }

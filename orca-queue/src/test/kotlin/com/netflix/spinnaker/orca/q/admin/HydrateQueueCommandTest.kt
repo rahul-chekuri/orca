@@ -51,6 +51,7 @@ import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.whenever
+import io.reactivex.rxjava3.core.Observable
 import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.spek.api.dsl.describe
@@ -59,7 +60,6 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.api.lifecycle.CachingMode
 import org.jetbrains.spek.subject.SubjectSpek
-import rx.Observable
 
 object HydrateQueueCommandTest : SubjectSpek<HydrateQueueCommand>({
 

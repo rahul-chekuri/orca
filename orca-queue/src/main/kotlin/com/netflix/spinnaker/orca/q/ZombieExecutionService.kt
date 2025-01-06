@@ -22,6 +22,9 @@ import com.netflix.spinnaker.orca.api.pipeline.models.PipelineExecution
 import com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository
 import com.netflix.spinnaker.q.metrics.MonitorableQueue
 import com.netflix.spinnaker.security.AuthenticatedRequest
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Scheduler
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -30,8 +33,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Component
-import rx.Scheduler
-import rx.schedulers.Schedulers
 
 /**
  * Logic related to operating zombie pipeline executions.
@@ -70,8 +71,7 @@ class ZombieExecutionService(
       .filter { hasBeenAroundAWhile(it, minimumInactivity) }
       .filter(this::queueHasNoMessages)
       .toList()
-      .toBlocking()
-      .first()
+      .blockingGet()
   }
 
   /**

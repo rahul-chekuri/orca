@@ -22,9 +22,9 @@ import com.netflix.spinnaker.orca.api.pipeline.models.ExecutionStatus
 import com.netflix.spinnaker.orca.api.pipeline.models.PipelineExecution
 import com.netflix.spinnaker.orca.front50.Front50Service
 import com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository
+import io.reactivex.rxjava3.schedulers.Schedulers
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import rx.schedulers.Schedulers
 
 @RestController
 class ProjectController {

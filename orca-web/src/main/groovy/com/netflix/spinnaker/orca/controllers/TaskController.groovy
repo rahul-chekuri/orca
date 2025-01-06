@@ -36,6 +36,8 @@ import com.netflix.spinnaker.orca.util.ExpressionUtils
 import com.netflix.spinnaker.security.AuthenticatedRequest
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Slf4j
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import org.springframework.http.HttpStatus
 import org.springframework.lang.Nullable
 import org.springframework.security.access.prepost.PostAuthorize
@@ -43,7 +45,6 @@ import org.springframework.security.access.prepost.PostFilter
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PreFilter
 import org.springframework.web.bind.annotation.*
-import rx.schedulers.Schedulers
 
 import java.nio.charset.Charset
 import java.time.Clock
@@ -61,6 +62,7 @@ import static com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepositor
 import static com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository.ExecutionComparator
 import static com.netflix.spinnaker.orca.pipeline.persistence.ExecutionRepository.ExecutionCriteria
 import static java.time.temporal.ChronoUnit.DAYS
+import static java.util.stream.Collectors.toList
 
 @Slf4j
 @RestController
@@ -136,7 +138,7 @@ class TaskController {
   @PostFilter("hasPermission(filterObject.application, 'APPLICATION', 'READ')")
   @RequestMapping(value = "/tasks", method = RequestMethod.GET)
   List<OrchestrationViewModel> list() {
-    executionRepository.retrieve(ORCHESTRATION).toBlocking().iterator.collect {
+    executionRepository.retrieve(ORCHESTRATION).blockingIterable().collect {
       convert it
     }
   }
@@ -226,13 +228,13 @@ class TaskController {
     if (executionIds) {
       List<String> ids = executionIds.split(',')
 
-      List<PipelineExecution> executions = rx.Observable.from(ids.collect {
+      List<PipelineExecution> executions = Observable.fromIterable(ids.collect {
         try {
           executionRepository.retrieve(PIPELINE, it)
         } catch (ExecutionNotFoundException e) {
           null
         }
-      }).subscribeOn(Schedulers.io()).toList().toBlocking().single().findAll()
+      }).subscribeOn(Schedulers.io()).toList().blockingGet().findAll()
 
       if (!expand) {
         unexpandPipelineExecutions(executions)
@@ -242,9 +244,9 @@ class TaskController {
     }
     List<String> ids = pipelineConfigIds.split(',')
 
-    List<PipelineExecution> allPipelines = rx.Observable.merge(ids.collect {
+    List<PipelineExecution> allPipelines = Observable.merge(ids.collect {
       executionRepository.retrievePipelinesForPipelineConfigId(it, executionCriteria)
-    }).subscribeOn(Schedulers.io()).toList().toBlocking().single().sort(startTimeOrId)
+    }).subscribeOn(Schedulers.io()).toList().blockingGet().sort(startTimeOrId)
 
     if (!expand) {
       unexpandPipelineExecutions(allPipelines)
@@ -344,7 +346,7 @@ class TaskController {
         } else {
           return true
         }
-      }).collect(Collectors.toList())
+      }).collect(toList())
       pipelineConfigIds = pipelines*.id as List<String>
     }
 
@@ -382,7 +384,7 @@ class TaskController {
                 // Filter by trigger params
                 return compareTriggerWithTriggerSubset(it.getTrigger(), triggerParams)
               })
-              .collect(Collectors.toList())
+              .collect(toList())
       )
 
       if (executions.size() < executionCriteria.pageSize) {
@@ -620,10 +622,10 @@ class TaskController {
           optimizedGetPipelineExecutions(application, allFront50PipelineConfigIds, executionCriteria)
       )
     } else {
-      allPipelineExecutions = rx.Observable.merge(allFront50PipelineConfigIds.collect {
+      allPipelineExecutions = Observable.merge(allFront50PipelineConfigIds.collect {
         log.debug("processing pipeline config id: $it")
         executionRepository.retrievePipelinesForPipelineConfigId(it, executionCriteria)
-      }).subscribeOn(Schedulers.io()).toList().toBlocking().single()
+      }).subscribeOn(Schedulers.io()).toList().blockingGet()
     }
 
     allPipelineExecutions.sort(startTimeOrId)
@@ -770,7 +772,7 @@ class TaskController {
     List<String> pipelineConfigIds = applicationNames.stream()
       .map { applicationName -> front50Service.getPipelines(applicationName, false)*.id as List<String> }
       .flatMap { c -> c.stream() }
-      .collect(Collectors.toList())
+      .collect(toList())
 
     return pipelineConfigIds
   }
